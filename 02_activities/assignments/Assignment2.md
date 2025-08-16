@@ -54,7 +54,50 @@ The store wants to keep customer addresses. Propose two architectures for the CU
 **HINT:** search type 1 vs type 2 slowly changing dimensions. 
 
 ```
-Your answer...
+
+
+Module: SQL
+Assignment: 2
+Section: 1
+Prompt: 3
+Name: Chun-Yuan Chen
+
+
+SCD Type 1: Overwriting the old address with the new one (i.e., old records overwritten)
+
+|customer_id|province|city           |street_name     |street_number|unit_number|postal_code| last_update_date |
+|-----------|--------|---------------|----------------|-------------|-----------|-----------|------------------|
+| 566       | ON     | Toronto       | Yonge Street   | 12          | 503       |M5E 1R4    |2025-08-15        |
+| 889       | ON     | Richmond Hill | Yonge Street   | 8868        | 702E      |L4C 1Z8    |2025-08-15        |
+
+In a Type 1 architecture, when a customer's address changes, the old address is overwritten with the new one, 
+in the general case so the table keeps only the most recent address for each customer. 
+In the illustrated example above, I put an 'last_update_date' column so can see when the address was last changed.
+
+
+SCD Type 2: While Keeping the old address, creating new rows for the new one (i.e., changes retained)
+
+|customer_id|province|city           |street_name     |street_number|unit_number|postal_code|effective_date_start|effective_date_end|
+|-----------|--------|---------------|----------------|-------------|-----------|-----------|--------------------|------------------|
+| 566       | ON     | Markham       | Main Street N  | 68          | 311       |L3P 0N5    |2023-01-25          |2025-08-14        |
+| 566       | ON     | Toronto       | Yonge Street   | 12          | 503       |M5E 1R4    |2025-08-15          |NULL              |
+| 889       | ON     | Hamilton      | Barton Street E| 2782        | 814       |L8E 2J8    |2020-06-17          |2025-08-14        |
+| 889       | ON     | Richmond Hill | Yonge Street   | 8868        | 702E      |L4C 1Z8    |2025-08-15          |NULL              |
+
+In contrast to the Type 1 architecture, the Type 2 architecture retains all the old addresses in the table when a customer's address changes and 
+adds the new one as a new row. In addition, two date columns (i.e., 'effective_date_start' and 'effective_date_end') 
+present the effective period for each address. For the current address, the 'effective_date_end' column is NULL because it is still active.  
+
+
+In my personal view, if the bookstore is small and has very limited storage resources, the Type 1 architecture would be easier to manage and query. 
+However, the Type 2 architecture offers a window to review past records, 
+which can be useful for checking back logistics and delivery issues that occurred before the address update.
+
+
+Chun-Yuan Chen
+2025-08-15
+
+
 ```
 
 ***
